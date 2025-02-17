@@ -10,7 +10,7 @@ An interactive story that lets you make choices and determine the outcome of the
 - **Color-Coded Endings:** Good endings are marked in green, while bad endings are highlighted in dark red, giving a clear indication of the consequences of your choices.
 
 ## How to Play
-1. Visit the website to begin the story.
+1. Visit the website to begin the story: [The Devil's Pages](https://devil-pages.netlify.app/)
 2. Read the introductory text that sets the scene.
 3. Choose between available options that appear at key points in the story.
 4. Continue making choices as you go through the story.
@@ -23,8 +23,4 @@ To run this project locally, follow these steps:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/galaxicitti/the-devils-pages.git
-2.webiste link:
-   https://devil-pages.netlify.app/
-
-
+   git clone https://github.com/your-username/the-devils-pages.git
