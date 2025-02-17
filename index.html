@@ -1,0 +1,266 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Devil’s Pages - Interactive Story</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            color: white;
+            overflow: hidden;
+            background-color: #333;
+        }
+        /* Custom animations for background movement */
+        @keyframes bgUpDown {
+            0%, 100% { background-position: center 0; }
+            50% { background-position: center 30%; }
+        }
+        .animate-bgUpDown {
+            animation: bgUpDown 3s ease-in-out infinite;
+        }
+
+        .story-container {
+            width: 100%;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            color: white;
+            font-size: 1.5rem;
+            transition: transform 1s ease-in-out;
+            position: relative;
+        }
+        .story-container.active {
+            transform: translateY(0);
+        }
+        .story-container.inactive {
+            transform: translateY(-100%);
+        }
+        .story-image-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%);
+            overflow: hidden;
+            max-width: 100%;
+            max-height: 100%;
+            aspect-ratio: 16/9;
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            transition: background-position 1s ease-in-out;
+        }
+
+        .story-content {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+        }
+        .blur-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark background */
+            backdrop-filter: blur(2px); /* Apply blur to the background behind the bar */
+            z-index: -1; /* Put it behind the content */
+        }
+        .choices {
+            position: relative;
+            z-index: 1;
+            margin-top: 20px;
+        }
+        .choice {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 1.2rem;
+            color: white;
+            border: none;
+        }
+        .choice:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .ending {
+            font-size: 1.5rem;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            animation: glowEffect 3s ease-in-out infinite;
+        }
+
+        @keyframes glowEffect {
+            0% {
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+            }
+            50% {
+                box-shadow: 0 0 20px 10px rgba(255, 0, 0, 0.7); /* Red Glow for bad endings */
+            }
+            100% {
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+            }
+        }
+
+        .ending.green-glow {
+            animation: greenGlowEffect 3s ease-in-out infinite;
+        }
+
+        @keyframes greenGlowEffect {
+            0% {
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+            }
+            50% {
+                box-shadow: 0 0 20px 10px rgba(0, 255, 0, 0.7); /* Green Glow for good endings */
+            }
+            100% {
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="story-container" id="story-container">
+        <div class="story-image-wrapper animate-bgUpDown" id="story-image-wrapper">
+        </div>
+        <div class="story-content">
+            <div class="blur-bar"></div> <!-- The blur bar -->
+            <div id="story"></div>
+            <div class="choices" id="choices"></div>
+        </div>
+    </div>
+
+    <script>
+        let storyContainer = document.getElementById("story-container");
+        let storyElement = document.getElementById("story");
+        let choicesElement = document.getElementById("choices");
+        let imageWrapper = document.getElementById("story-image-wrapper");
+
+        const storyParts = {
+            intro: {
+                text: "Ethan had always been an avid reader, often losing himself in novels during his free time at college. One day, he was reading in class with other kids, his latest obsession being 'Devilbound', a dark fantasy novel about a secret war between humanity and devils hiding among them.\n\nThe classroom was a large, old lecture hall with towering bookshelves lining the walls, the faint scent of chalk dust lingering in the air. Wooden desks, scarred with years of etchings and carvings from students past, were arranged in neat rows.",
+                image: "image8.webp",  // Image for this part
+                choices: [
+                    { text: "Continue reading, feeling uneasy.", action: "uneasy" },
+                    { text: "Look around the classroom, sensing something wrong.", action: "look_around" }
+                ]
+            },
+            uneasy: {
+                text: "Ethan continued reading, but the atmosphere around him began to change. The words on the page blurred, then rearranged themselves. He blinked hard and then saw: 'As he sat in the classroom, Kael sensed the shift in the air—the devils had arrived.' Ethan’s heart pounded. The description was eerily identical to his surroundings.",
+                image: "image2.webp",  // Image for this part
+                choices: [
+                    { text: "Confront the shadow.", action: "confront_shadow" },
+                    { text: "Try to escape the classroom.", action: "escape_classroom" }
+                ]
+            },
+            look_around: {
+                text: "Ethan felt something shift. The air grew thick, and a shadow twisted unnaturally at the far end of the classroom. A pair of glowing red eyes emerged from the darkness. The growl was deep and guttural. Ethan tried to shake off his fear but couldn’t ignore the pull of terror in his gut.",
+                image: "image3.webp",  // Image for this part
+                choices: [
+                    { text: "Confront the shadow.", action: "confront_shadow" },
+                    { text: "Try to escape the classroom.", action: "escape_classroom" }
+                ]
+            },
+            confront_shadow: {
+                text: "Ethan stood up, gripping his book tightly as if it could protect him. The creature emerged from the darkness, grotesque and terrifying, its skin charred and bone-like. It whispered, 'You are not supposed to know.' The battle began.",
+                image: "image9.webp",  // Image for this part
+                choices: [
+                    { text: "Embrace your new power and fight.", action: "embrace_power" },
+                    { text: "Suppress the power and run.", action: "suppress_power" }
+                ]
+            },
+            escape_classroom: {
+                text: "Ethan bolted from his seat and ran toward the door. As he flung it open, the world around him warped. The hallway stretched on forever, and shadows closed in from all sides. But he made it outside. The streets were empty, and a strange red sky hung above.",
+                image: "image4.webp",  // Image for this part
+                choices: [
+                    { text: "Accept your fate and join the devils.", action: "join_devils" },
+                    { text: "Resist and find a way to stop the devils.", action: "fight_back" }
+                ]
+            },
+            embrace_power: {
+                text: "Ethan embraced the power surging within him. The symbols on his arms glowed brighter, and the air around him distorted. He could feel the world shift. He was no longer human but a hybrid of man and devil. The devils had found their leader.",
+                image: "image7.webp",  // Image for this part
+                ending: "The Devil's Rebirth: Ethan led the devils in their war, and the world fell under their rule. There was no turning back.",
+                endingType: "bad"
+            },
+            suppress_power: {
+                text: "Ethan resisted the power but felt himself weakening as the devils closed in. The creature’s whisper haunted him. He stumbled, but there was no escape. The devils had already won.",
+                image: "image5.webp",  // Image for this part
+                ending: "The Final Escape: Ethan was the last human, hiding in a world overtaken by darkness.",
+                endingType: "bad"
+            },
+            join_devils: {
+                text: "Ethan chose to join the devils. He was no longer human. As their leader, he brought destruction to the world, ending humanity’s fight for survival.",
+                image: "image6.webp",  // Image for this part
+                ending: "The Inescapable Fate: Ethan embraced the devils' rule and became their ultimate champion, condemning humanity forever.",
+                endingType: "bad"
+            },
+            fight_back: {
+                text: "Ethan gathered his courage and fought back, using his knowledge of the devils' weaknesses. The world wasn’t lost yet, and the battle to reclaim it had just begun.",
+                image: "image1.webp",  // Image for this part
+                ending: "The Rebirth of the Devil Hunter: Ethan became humanity’s last hope, fighting back against the devils with every ounce of his strength.",
+                endingType: "good"
+            }
+        };
+
+        let currentPart = "intro";
+
+        function displayStory(part) {
+            storyContainer.classList.add("inactive");
+            setTimeout(() => {
+                storyContainer.classList.remove("inactive");
+                storyContainer.classList.add("active");
+
+                storyElement.textContent = storyParts[part].text;
+                imageWrapper.style.backgroundImage = `url(${storyParts[part].image})`;  // Set background image
+                choicesElement.innerHTML = "";
+
+                if (storyParts[part].choices) {
+                    storyParts[part].choices.forEach(choice => {
+                        let choiceButton = document.createElement("button");
+                        choiceButton.classList.add("choice");
+                        choiceButton.textContent = choice.text;
+                        choiceButton.onclick = () => handleChoice(choice.action);
+                        choicesElement.appendChild(choiceButton);
+                    });
+                } else if (storyParts[part].ending) {
+                    let endingMessage = document.createElement("div");
+                    endingMessage.classList.add("ending");
+
+                    if (storyParts[part].endingType === "good") {
+                        endingMessage.classList.add("green-glow");
+                        endingMessage.textContent = storyParts[part].ending;
+                    } else if (storyParts[part].endingType === "bad") {
+                        endingMessage.classList.add("red-glow");
+                        endingMessage.textContent = storyParts[part].ending;
+                    }
+
+                    choicesElement.appendChild(endingMessage);
+                }
+            }, 1000);
+        }
+
+        function handleChoice(action) {
+            currentPart = action;
+            displayStory(currentPart);
+        }
+
+        displayStory(currentPart);
+    </script>
+</body>
+</html>
